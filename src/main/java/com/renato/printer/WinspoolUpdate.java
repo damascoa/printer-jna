@@ -4,6 +4,7 @@ import com.sun.jna.Memory;
 import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 import com.sun.jna.Structure;
+import com.sun.jna.platform.win32.WinDef;
 import com.sun.jna.platform.win32.WinDef.DWORD;
 import com.sun.jna.platform.win32.WinDef.INT_PTR;
 import com.sun.jna.platform.win32.WinNT.HANDLE;
@@ -14,11 +15,11 @@ import com.sun.jna.win32.W32APIOptions;
 
 import java.util.Arrays;
 import java.util.List;
+
 public class WinspoolUpdate {
     public interface WinspoolLib extends StdCallLibrary {
 
-        WinspoolLib INSTANCE = (WinspoolLib) Native.loadLibrary("Winspool.drv", WinspoolLib.class,
-                W32APIOptions.UNICODE_OPTIONS);
+        WinspoolLib INSTANCE = (WinspoolLib) Native.loadLibrary("Winspool.drv", WinspoolLib.class, W32APIOptions.UNICODE_OPTIONS);
 
         boolean EnumPrinters(int Flags, String Name, int Level, Pointer pPrinterEnum,
                              int cbBuf, IntByReference pcbNeeded, IntByReference pcReturned);
@@ -27,6 +28,13 @@ public class WinspoolUpdate {
 
         boolean OpenPrinter(String pPrinterName, HANDLEByReference phPrinter, Pointer pDefault);
 
+        boolean StartDocPrinter(HANDLE hPrinter, int level, DOC_INFO_1 docInfo);
+        boolean StartPagePrinter(HANDLE hPrinter);
+        boolean WritePrinter(HANDLE hPrinter, byte[] data, DWORD nBytes, WinDef.DWORDByReference dwWritten);
+        boolean EndPagePrinter(HANDLE hPrinter);
+        boolean EndDocPrinter(HANDLE hPrinter);
+        boolean ClosePrinter(HANDLE hPrinter);
+
         public static class PRINTER_INFO_1 extends Structure {
             public int Flags;
             public String pDescription;
@@ -34,7 +42,7 @@ public class WinspoolUpdate {
             public String pComment;
 
             protected List<String> getFieldOrder() {
-                return Arrays.asList(new String[] { "Flags", "pDescription", "pName", "pComment" });
+                return Arrays.asList(new String[]{"Flags", "pDescription", "pName", "pComment"});
             }
 
             public PRINTER_INFO_1() {
@@ -69,10 +77,10 @@ public class WinspoolUpdate {
             public int AveragePPM;
 
             protected List<String> getFieldOrder() {
-                return Arrays.asList(new String[] { "pServerName", "pPrinterName", "pShareName", "pPortName",
+                return Arrays.asList(new String[]{"pServerName", "pPrinterName", "pShareName", "pPortName",
                         "pDriverName", "pComment", "pLocation", "pDevMode", "pSepFile", "pPrintProcessor",
                         "pDatatype", "pParameters", "pSecurityDescriptor", "Attributes", "Priority", "DefaultPriority",
-                        "StartTime", "UntilTime", "Status", "cJobs", "AveragePPM" });
+                        "StartTime", "UntilTime", "Status", "cJobs", "AveragePPM"});
             }
 
             public PRINTER_INFO_2() {
@@ -89,7 +97,7 @@ public class WinspoolUpdate {
             public DWORD Attributes;
 
             protected List<String> getFieldOrder() {
-                return Arrays.asList(new String[] { "pPrinterName", "pServerName", "Attributes" });
+                return Arrays.asList(new String[]{"pPrinterName", "pServerName", "Attributes"});
             }
 
             public PRINTER_INFO_4() {
@@ -97,6 +105,18 @@ public class WinspoolUpdate {
 
             public PRINTER_INFO_4(int size) {
                 super(new Memory(size));
+            }
+        }
+
+
+        // Definição da estrutura DOC_INFO_1
+        public static class DOC_INFO_1 extends Structure {
+            public String pDocName;
+            public String pOutputFile;
+            public String pDataType;
+            @Override
+            protected List<String> getFieldOrder() {
+                return Arrays.asList("pDocName", "pOutputFile", "pDataType");
             }
         }
 

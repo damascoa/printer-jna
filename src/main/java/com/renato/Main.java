@@ -18,5 +18,8 @@ public class Main {
 
         WinspoolUpdate.WinspoolLib.PRINTER_INFO_2 printerInfo = WinspoolUtil.getPrinterInfo2("TESTE");
         System.out.println(printerInfo.pPrinterName + ": " + printerInfo.pDriverName + " - "+printerInfo.Status+" - "+ PrinterStatus.fromCode(printerInfo.Status));
+
+        WinspoolUtil.print("Microsoft Print to PDF");
+
     }
 }
